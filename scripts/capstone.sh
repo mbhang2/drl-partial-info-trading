@@ -14,7 +14,7 @@
 set -e
 NSEEDS="${1:-${SEEDS:-5}}"
 EVAL_SEED=999
-HID_CSV=hid.csv; PROB_CSV=prob.csv; REG_CSV=reg.csv
+HID_CSV=results/runs/hid.csv; PROB_CSV=results/runs/prob.csv; REG_CSV=results/runs/reg.csv
 rm -f "$HID_CSV" "$PROB_CSV" "$REG_CSV"
 
 echo "capstone | $NSEEDS seeds/cell | eval_seed $EVAL_SEED -> {hid,prob,reg}.csv"
@@ -47,11 +47,11 @@ for sc in 1 2 3; do
 done
 
 echo ""; echo "================ FINAL GRID ================"
-python3 - hid.csv prob.csv reg.csv << 'PY'
+python3 - "$HID_CSV" "$PROB_CSV" "$REG_CSV" << 'PY'
 import csv, sys, numpy as np
 from collections import defaultdict
 cell = defaultdict(list)
-for path, variant in [("hid.csv","hid"), ("prob.csv","prob"), ("reg.csv","reg")]:
+for path, variant in zip(sys.argv[1:4], ("hid","prob","reg")):
     try:
         for r in csv.DictReader(open(path)):
             cell[(variant, int(r["scenario"]))].append(float(r["mean"]))
